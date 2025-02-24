@@ -5,10 +5,10 @@ import pickle
 import streamlit as st
 
 # Set the page title and description
-st.title("Credit Loan Eligibility Predictor")
+st.title("House Price Predictor")
 st.write("""
-This app predicts whether a loan applicant is eligible for a loan 
-based on various personal and financial characteristics.
+This app predicts the price of a house based on various features 
+such as square footage, number of bedrooms, property age, and more.
 """)
 
 # # Optional password protection (remove if not needed)
@@ -25,105 +25,72 @@ rf_pickle.close()
 
 # Prepare the form to collect user inputs
 with st.form("user_inputs"):
-    st.subheader("Loan Applicant Details")
+    st.subheader("House Details")
     
-    # Gender input
-    Gender = st.selectbox("Gender", options=["Male", "Female"])
-    
-    # Marital Status
-    Married = st.selectbox("Marital Status", options=["Yes", "No"])
-    
-    # Dependents
-    Dependents = st.selectbox("Number of Dependents", 
-                               options=["0", "1", "2", "3+"])
-    
-    # Education
-    Education = st.selectbox("Education Level", 
-                              options=["Graduate", "Not Graduate"])
-    
-    # Self Employment
-    Self_Employed = st.selectbox("Self Employed", options=["Yes", "No"])
-    
-    # Applicant Income
-    ApplicantIncome = st.number_input("Applicant Monthly Income", 
-                                       min_value=0, 
-                                       step=1000)
-    
-    # Coapplicant Income
-    CoapplicantIncome = st.number_input("Coapplicant Monthly Income", 
-                                         min_value=0, 
-                                         step=1000)
-    
-    # Loan Amount
-    LoanAmount = st.number_input("Loan Amount", 
-                                  min_value=0, 
-                                  step=1000)
-    
-    # Loan Amount Term
-    Loan_Amount_Term = st.selectbox("Loan Amount Term (Months)", 
-                                    options=["360", "180", "240", "120", "60"])
-    
-    # Credit History
-    Credit_History = st.selectbox("Credit History", 
-                                  options=["1", "0"])
-    
-    # Property Area
-    Property_Area = st.selectbox("Property Area", 
-                                 options=["Urban", "Semiurban", "Rural"])
-    
+   # Year Sold
+    year_sold = st.number_input("Year Sold", min_value=1900, max_value=2025, value=2013, step=1)
+
+    # Property Tax
+    property_tax = st.number_input("Annual Property Tax ($)", min_value=0, step=10)
+
+    # Insurance
+    insurance = st.number_input("Annual Insurance Cost ($)", min_value=0, step=10)
+
+    # Bedrooms
+    beds = st.number_input("Number of Bedrooms", min_value=0, step=1)
+
+    # Bathrooms
+    baths = st.number_input("Number of Bathrooms", min_value=0, step=1)
+
+    # Square Footage
+    sqft = st.number_input("House Square Footage (sqft)", min_value=100, step=10)
+
+    # Year Built
+    year_built = st.number_input("Year Built", min_value=1800, max_value=2025, step=1)
+
+    # Lot Size
+    lot_size = st.number_input("Lot Size (sqft)", min_value=0, step=1)
+
+    # Basement
+    basement = st.selectbox("Has Basement?", options=["Yes", "No"])
+    basement = 1 if basement == "Yes" else 0
+
+    # Popular
+    popular = st.selectbox("Popular Area?", options=["Yes", "No"])
+    popular = 1 if popular == "Yes" else 0
+
+    # Recession
+    recession = st.selectbox("Sold During Recession?", options=["Yes", "No"])
+    recession = 1 if recession == "Yes" else 0
+
+    # Property Age Calculation
+    property_age = year_sold - year_built
+
+    # Property Type
+    property_type = st.selectbox("Property Type", options=["Bungalow", "Condo"])
+    property_type_Bungalow = 1 if property_type == "Bungalow" else 0
+    property_type_Condo = 1 if property_type == "Condo" else 0
+
     # Submit button
-    submitted = st.form_submit_button("Predict Loan Eligibility")
+    submitted = st.form_submit_button("Predict House Price")
 
 
-# Handle the dummy variables to pass to the model
+# Handle the input for the regression model
 if submitted:
-    Gender_Male = 0 if Gender == "Female" else 1
-    Gender_Female = 1 if Gender == "Female" else 0
-
-    Married_Yes = 1 if Married == "Yes" else 0
-    Married_No = 1 if Married == "No" else 0
-
-    # Handle dependents
-    Dependents_0 = 1 if Dependents == "0" else 0
-    Dependents_1 = 1 if Dependents == "1" else 0
-    Dependents_2 = 1 if Dependents == "2" else 0
-    Dependents_3 = 1 if Dependents == "3+" else 0
-
-    Education_Graduate = 1 if Education == "Graduate" else 0
-    Education_Not_Graduate = 1 if Education == "Not Graduate" else 0
-
-    Self_Employed_Yes = 1 if Self_Employed == "Yes" else 0
-    Self_Employed_No = 1 if Self_Employed == "No" else 0
-
-    Property_Area_Rural = 1 if Property_Area == "Rural" else 0
-    Property_Area_Semiurban = 1 if Property_Area == "Semiurban" else 0
-    Property_Area_Urban = 1 if Property_Area == "Urban" else 0
-
-    # Convert Loan Amount Term and Credit History to integers
-    Loan_Amount_Term = int(Loan_Amount_Term)
-    Credit_History = int(Credit_History)
-
-    # Prepare the input for prediction. This has to go in the same order as it was trained
-    prediction_input = [[ApplicantIncome, CoapplicantIncome, LoanAmount,
-        Loan_Amount_Term, Credit_History, Gender_Female, Gender_Male,
-        Married_No, Married_Yes, Dependents_0, Dependents_1,
-        Dependents_2, Dependents_3, Education_Graduate,
-        Education_Not_Graduate, Self_Employed_No, Self_Employed_Yes,
-        Property_Area_Rural, Property_Area_Semiurban, Property_Area_Urban
+    # Prepare the input in the correct order
+    prediction_input = [[
+        year_sold, property_tax, insurance, beds, baths, sqft, year_built, 
+        lot_size, basement, popular, recession, property_age, 
+        property_type_Bungalow, property_type_Condo
     ]]
 
     # Make prediction
-    new_prediction = rf_model.predict(prediction_input)
+    predicted_price = rf_model.predict(prediction_input)[0]
 
     # Display result
-    st.subheader("Prediction Result:")
-    if new_prediction[0] == 1:
-        st.write("You are eligible for the loan!")
-    else:
-        st.write("Sorry, you are not eligible for the loan.")
+    st.subheader("Predicted House Price:")
+    st.write(f"**${predicted_price:,.2f}**")
 
 st.write(
-    """We used a machine learning (Random Forest) model to predict your eligibility, the features used in this prediction are ranked by relative
-    importance below."""
+    """We used a machine learning (Regression) model to predict the house price."""
 )
-st.image("feature_importance.png")

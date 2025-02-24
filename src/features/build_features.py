@@ -13,3 +13,10 @@ def create_dummy_vars(df):
     y = df['Loan_Approved']
 
     return X, y
+
+def build_features(df):
+    
+    X = df.drop('price', axis=1)
+    y = df['price']
+
+    return X, y
