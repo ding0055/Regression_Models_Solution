@@ -11,11 +11,7 @@ This app predicts the price of a house based on various features
 such as square footage, number of bedrooms, property age, and more.
 """)
 
-# # Optional password protection (remove if not needed)
-# password_guess = st.text_input("Please enter your password?")
-# # this password is stores in streamlit secrets
-# if password_guess != st.secrets["password"]:
-#     st.stop()
+
 
 # Load the pre-trained model
 rf_pickle = open("models/RFmodel.pkl", "rb")
@@ -92,5 +88,5 @@ if submitted:
     st.write(f"**${predicted_price:,.2f}**")
 
 st.write(
-    """We used a machine learning (Regression) model to predict the house price."""
+    """We used a machine learning (Random Forest Regressor) model to predict the house price."""
 )

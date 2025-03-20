@@ -1,15 +1,3 @@
-# from setuptools import find_packages, setup
-
-
-# setup(
-#     name='src',
-#     packages=find_packages(),
-#     version='0.1.0',
-#     description='Credit Risk Model code structuring',
-#     author='Swapnil Kangralkar',
-#     license='',
-# )
-
 from src.data.make_dataset import load_and_preprocess_data
 from src.visualization.visualize import plot_correlation_heatmap, plot_feature_importance, plot_confusion_matrix
 from src.features.build_features import build_features
